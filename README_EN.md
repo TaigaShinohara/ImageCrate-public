@@ -61,10 +61,13 @@ Built from scratch using native Web APIs and Manifest V3, ImageCrate has **zero 
 
 ## Privacy & Permissions
 
-- **Zero Telemetry**: No third-party analytics, tracking pixels, account registrations, or remote servers.
-- **Host Permissions**: `host_permissions: ["http://*/*", "https://*/*"]` is granted once upon installation so the extension can fetch cross-origin image candidates for thumbnails and direct saving without annoying per-CDN runtime permission popups.
-- **Storage Scope**: Session data (collected URLs, selection states, active jobs) is kept in Chrome session storage and discarded when the tab or browser closes. No browsing history or personal data is permanently tracked.
-- **Metadata**: Original format downloads preserve camera EXIF/GPS metadata. Format conversion re-encodes rasters, though it is not a dedicated anonymizer. See [docs/PRIVACY.md](docs/PRIVACY.md) for details.
+- **Zero telemetry**: No analytics, accounts, or requests to the developer. Image bytes are fetched from the server that hosts each image.
+- **No install-time access to every site**: The package does not declare required `host_permissions`. `optional_host_permissions` lists `http://*/*` and `https://*/*` only so Chrome can later grant a specific image host. Nothing is granted until you allow that host.
+- **When access is requested**: Opening the extension does not ask for another site. Images on the same site as the page you opened can be previewed with the temporary access from the toolbar click. A different image host is requested only when you press that host's button, or when you save to a chosen folder, make a ZIP, or convert the file. Saving the original file into Chrome's download folder does not ask for site access.
+- **Storage**: The current page address, image candidates, and save progress stay in Chrome session storage and are dropped when the browser session ends. A remembered save folder, if you leave that option on, stays in on-device IndexedDB.
+- **Metadata**: Original-format saves keep camera metadata that was already in the file, which can include location. Conversion redraws the image on the device and is not a full anonymizer.
+
+See [docs/PRIVACY.md](docs/PRIVACY.md) and the store privacy policy [docs/PRIVACY_POLICY.md](docs/PRIVACY_POLICY.md).
 
 ---
 
@@ -82,6 +85,9 @@ npm test
 
 # Run static checks (Manifest, CSP, module links, Safari compatibility)
 npm run check
+
+# Build the Chrome Web Store zip (contents of extension/ at the archive root)
+npm run package
 
 # Browser tests (requires devDependencies)
 npm ci

@@ -19,7 +19,6 @@ const hasDownloadId=job=>Number.isSafeInteger(job?.downloadId)&&job.downloadId>=
 const isMobileClient = () => (typeof navigator !== 'undefined' && (navigator.maxTouchPoints > 0 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || '')));
 const hasChromeDownloads = () => (typeof chrome !== 'undefined' && Boolean(chrome?.downloads?.download));
 let state, selected = new Set(), visible = [], loading = false, requestPending = false, pollRunning = false;
-let recorder = null;
 let draft=null, draftHandle=null, draftPermission='prompt', settingsGeneration=0;
 let draftRemember=true, draftRememberPolicy=null, rememberLoading=false;
 let uiWrites=Promise.resolve(), pendingSelections=0, measureTimer, measureUpdates=new Map();
@@ -155,7 +154,7 @@ chrome.tabs.onRemoved.addListener(sourceChanged);
 function updateSummary() {
   if(!state) return;
   const batch=summarizeJobs(state.jobs), busy=isBusy();
-  $('scan').disabled=busy || Boolean(recorder?.busy);$('next-page').disabled=busy;$('continuation-hint').hidden=!state.scan?.hasMore;
+  $('scan').disabled=busy;$('next-page').disabled=busy;$('continuation-hint').hidden=!state.scan?.hasMore;
   document.body.dataset.loading=String(loading);
   $('grid').setAttribute('aria-busy',String(loading));
   $('batch').textContent=batch.total ? `今回 ${batch.total}件中 ${batch.complete}件保存完了 · ${batch.interrupted}件中断${batch.active ? ` · ${batch.active}件処理中` : ''}` : '';
@@ -200,7 +199,7 @@ function renderImages() {
   renderFilterState(filters);gallery.render();visible=gallery.visible;updateSummary();
 }
 async function scan(continuation=false) {
-  if(isBusy() || recorder?.busy) return;
+  if(isBusy()) return;
   const isInitial = !state.scanned;
   loading=true;clearError();updateSummary();$('message').textContent='画像を探しています…';
   try { await uiWrites.catch(()=>{});applyState(await send('scan',{continuation}));render();const added=state.scan?.addedURLs?.length || 0;

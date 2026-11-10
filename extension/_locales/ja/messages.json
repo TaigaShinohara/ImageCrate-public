@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "ImageCrate",
+    "description": "Extension name shown in Chrome and the Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "開いているページの画像を選んで、まとめて保存します。",
+    "description": "Short description. Must stay within 132 characters."
+  },
+  "actionTitle": {
+    "message": "ImageCrateを開く",
+    "description": "Toolbar button title."
+  }
+}

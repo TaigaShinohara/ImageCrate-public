@@ -20,6 +20,7 @@ ehthumbs.db
 playwright-report/
 test-results/
 coverage/
+dist/
 *.zip
 
 # IDE & Editors
