@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/TaigaShinohara/ImageCrate/actions/workflows/ci.yml"><img src="https://github.com/TaigaShinohara/ImageCrate/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>
+  <a href="https://github.com/TaigaShinohara/ImageCrate-public/actions/workflows/ci.yml"><img src="https://github.com/TaigaShinohara/ImageCrate-public/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/Chrome-116%2B-brightgreen.svg" alt="Chrome 116+">
   <img src="https://img.shields.io/badge/Safari-iOS%20%2F%20macOS-blue.svg" alt="Safari iOS/macOS">
@@ -74,8 +74,8 @@ ImageCrate requires **Node.js 22+**.
 
 ```sh
 # Clone repository
-git clone https://github.com/TaigaShinohara/ImageCrate.git
-cd ImageCrate
+git clone https://github.com/TaigaShinohara/ImageCrate-public.git
+cd ImageCrate-public
 
 # Run unit tests (built-in node:test runner)
 npm test
