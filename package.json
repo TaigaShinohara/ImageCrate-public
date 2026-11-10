@@ -8,11 +8,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TaigaShinohara/ImageCrate.git"
+    "url": "git+https://github.com/TaigaShinohara/ImageCrate-public.git"
   },
-  "homepage": "https://github.com/TaigaShinohara/ImageCrate#readme",
+  "homepage": "https://github.com/TaigaShinohara/ImageCrate-public#readme",
   "bugs": {
-    "url": "https://github.com/TaigaShinohara/ImageCrate/issues"
+    "url": "https://github.com/TaigaShinohara/ImageCrate-public/issues"
   },
   "keywords": [
     "chrome-extension",

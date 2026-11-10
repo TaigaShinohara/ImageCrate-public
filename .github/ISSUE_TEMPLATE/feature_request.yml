@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         ImageCrate をより良くするためのアイデアを歓迎します！
-        提案の前に、既存の Issue や [docs/DESIGN.md](https://github.com/TaigaShinohara/ImageCrate/blob/main/docs/DESIGN.md) に類似の議論がないかご確認ください。
+        提案の前に、既存の Issue や [docs/DESIGN.md](https://github.com/TaigaShinohara/ImageCrate-public/blob/main/docs/DESIGN.md) に類似の議論がないかご確認ください。
   - type: textarea
     id: problem
     attributes:
