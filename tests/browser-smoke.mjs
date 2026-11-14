@@ -15,6 +15,10 @@ const workerPath=join(extension,'background.js');await writeFile(workerPath,(awa
 // Fixture replacement must not race the real UI's queued persistence writes.
 const workspacePath=join(extension,'workspace.js');await writeFile(workspacePath,(await readFile(workspacePath,'utf8'))+'\nglobalThis.__flushQAUI=async()=>{clearTimeout(scrollTimer);clearTimeout(measureTimer);await uiWrites.catch(()=>{});clearTimeout(scrollTimer);clearTimeout(measureTimer);};\n');
 const manifest=JSON.parse(await readFile(join(extension,'manifest.json'),'utf8'));
+const messageName=/^__MSG_([A-Za-z0-9_]+)__$/.exec(manifest.name || '');
+const productName=messageName
+  ? JSON.parse(await readFile(join(extension,'_locales',manifest.default_locale,'messages.json'),'utf8'))[messageName[1]].message
+  : manifest.name;
 manifest.host_permissions=['http://127.0.0.1/*'];await writeFile(join(extension,'manifest.json'),JSON.stringify(manifest));
 let clip=Buffer.alloc(0), failedOnce=true, slowDirectoryWrites=false;
 const slowRequests=[],priorityPreviewResponses=[];let holdPriorityPreviews=false;
@@ -94,7 +98,7 @@ try {
   await manager.waitForFunction(()=>document.querySelector('#message').textContent.includes('候補を取得'));
   const downloadFolder=join(scratch,'downloads');await mkdir(downloadFolder);
   const session=await context.newCDPSession(manager);await session.send('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:downloadFolder,eventsEnabled:true});
-  if(manifest.name==='ImageCrate') {
+  if(productName==='ImageCrate') {
     assert.ok(await manager.locator('.card').count()>=5,'DOM, background, shadow and frame collection');
     assert.equal(await manager.locator('.image-select:checked').count(),0,'initial selection is empty');
     await manager.waitForFunction(()=>{const image=document.querySelector('.thumb img');return image?.complete&&image.naturalWidth>0&&image.src.startsWith('blob:');});
@@ -504,9 +508,9 @@ try {
   const restartedWorker=context.serviceWorkers().find(w=>w.url().includes(id));
   assert.ok(restartedWorker,'worker is available after page reconnects');
   assert.notEqual(await restartedWorker.evaluate(()=>globalThis.__workerBoot),bootBefore,'service worker actually restarted');
-  if(manifest.name==='VideoHarbor')await manager.locator('#record-tab').click();
+  if(productName==='VideoHarbor')await manager.locator('#record-tab').click();
   if(process.env.QA_SCREENSHOT)await manager.screenshot({path:process.env.QA_SCREENSHOT.replace('.png','-desktop.png'),fullPage:true,animations:'disabled'});
-  if(manifest.name==='ImageCrate') {
+  if(productName==='ImageCrate') {
     // A second representative visual state includes open filters, chips and hidden selections.
     await manager.locator('.image-select').nth(0).check();await manager.locator('.image-select').nth(1).check();
     await manager.locator('#filters > summary').click();
@@ -529,7 +533,7 @@ try {
   assert.ok(await manager.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'360px layout does not overflow');
   if(process.env.QA_SCREENSHOT)await manager.screenshot({path:process.env.QA_SCREENSHOT,fullPage:true,animations:'disabled'});
   if(process.env.QA_SCREENSHOT)await manager.screenshot({path:process.env.QA_SCREENSHOT.replace('.png','-viewport.png'),fullPage:false,animations:'disabled'});
-  if(manifest.name==='ImageCrate') {
+  if(productName==='ImageCrate') {
     assert.equal(await manager.locator('.grid').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),2,'360px keeps two image columns');
     await manager.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
     const mobileGeometry=await manager.evaluate(()=>{
@@ -582,6 +586,6 @@ try {
     }
   }
   assert.deepEqual(errors,[],'no uncaught page errors');
-  console.log(`${manifest.name} browser smoke PASS (isolated Chrome, local fixture). Native activeTab invocation, tabCapture consent and macOS display/audio remain manual.`);
+  console.log(`${productName} browser smoke PASS (isolated Chrome, local fixture). Native toolbar activeTab invocation and the macOS folder picker remain manual.`);
   if(process.env.QA_KEEP)console.log(`QA files retained locally: ${scratch}`);
 } finally {await context?.close();for(const record of priorityPreviewResponses)record.response.destroy();await new Promise(resolve=>server.close(resolve));if(!process.env.QA_KEEP)await rm(scratch,{recursive:true,force:true});}

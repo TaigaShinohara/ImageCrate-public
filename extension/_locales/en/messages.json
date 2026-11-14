@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "ImageCrate",
+    "description": "Extension name shown in Chrome and the Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "Choose images on the current page and save them together.",
+    "description": "Short description. Must stay within 132 characters."
+  },
+  "actionTitle": {
+    "message": "Open ImageCrate",
+    "description": "Toolbar button title."
+  }
+}

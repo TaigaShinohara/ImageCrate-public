@@ -1,12 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import {createTransferBudget,reserveTransferAttempt} from '../extension/transfer-budget.js';
 import {MEDIA_LIMITS} from '../extension/media-limits.js';
 import {createImageResourceCoordinator} from '../extension/image-decoder.js';
 
-const manifest = JSON.parse(readFileSync(new URL('../extension/manifest.json', import.meta.url)));
-const supportsRecording = manifest.permissions.includes('tabCapture');
 let moduleNumber = 0;
 const nextTurn = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -105,7 +102,6 @@ async function browser(t, options = {}) {
         changed.emit({ id, state: { current: 'interrupted' }, error: { current: 'USER_CANCELED' } });
       },
     },
-    tabCapture: { getCapturedTabs: async () => [], getMediaStreamId: async () => 'one-use-stream' },
   };
   if (options.withAlarms) chrome.alarms={onAlarm:alarmEvent,
     async get(name) { return clone(alarms.get(name)); },
@@ -431,21 +427,6 @@ test('legacy native migration preserves the accepted file after close and refuse
   }, 'closed workspace must not leave a queued or in-progress batch after all downloads finish');
   assert.equal(h.requested.length, 0, 'legacy queued work requires an explicit new versioned batch');
 });
-
-test('BG-02: a capture owner that navigated away cannot keep another workspace locked',
-  { skip: !supportsRecording }, async (t) => {
-    const h = await browser(t);
-    h.tabs.set(999, { id: 999, url: 'https://another-page.test/' });
-    h.store.set('captureLock', { tabId: 999, instance: 'departed-page', mode: 'display' });
-    const response = await h.send({ type: 'capture', mode: 'display' });
-    assert.equal(response.ok, true, response.error);
-    const lock = h.store.get('captureLock');
-    assert.equal(lock.tabId, 100, 'the new workspace owns the granted capture');
-    assert.equal(lock.instance, 'current-page');
-    const release = await h.send({ type: 'release' });
-    assert.equal(release.ok, true);
-    assert.equal(h.store.has('captureLock'), false);
-  });
 
 test('BG-03: a download completing just before cancel remains complete and is never retried', async (t) => {
   const h = await browser(t);

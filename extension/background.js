@@ -915,27 +915,6 @@ function managedSettlement(state,message) {
     job.transfer.usageUnknown=message.outcome === 'unknown';markManagedOutcomeUnknown(state,job);
   }
 }
-async function claim(state, instance, mode, wantStream = true) {
-  if (KIND !== 'videos') throw new Error('未対応の操作です。');
-  const current = (await chrome.storage.session.get('captureLock')).captureLock;
-  const owner=current && await liveTab(current.tabId);
-  const ownerLive=owner?.url?.startsWith(chrome.runtime.getURL('workspace.html?id='));
-  if(current && !ownerLive) await chrome.storage.session.remove('captureLock');
-  if (current && ownerLive && (current.tabId !== state.workspaceTabId || current.instance !== instance)) {
-    throw new Error('別の作業タブで録画中です。停止してから開始してください。');
-  }
-  // Same owner may not start another capture while one is active.
-  if (ownerLive && current?.instance === instance) throw new Error('録画はすでに開始されています。');
-  await chrome.storage.session.set({captureLock:{tabId:state.workspaceTabId,instance,mode}});
-  try {
-    if (mode !== 'tab' || !wantStream) return {};
-    const tab = await liveTab(state.tabId);
-    if (!tab || tab.url !== state.url) throw new Error('元ページが閉じられたか移動しました。拡張を押し直してください。');
-    const captured = await chrome.tabCapture.getCapturedTabs();
-    if (captured.some(t=>t.tabId === state.tabId && t.status !== 'stopped' && t.status !== 'error')) throw new Error('このタブはすでに録画されています。');
-    return {streamId:await chrome.tabCapture.getMediaStreamId({targetTabId:state.tabId,consumerTabId:state.workspaceTabId})};
-  } catch(error) { await chrome.storage.session.remove('captureLock'); throw error; }
-}
 function requireDirectoryKey(state,key) {
   if (typeof key !== 'string' || key.length > 180 || !(key === `session:${state.id}` || key.startsWith(`session:${state.id}:`) && key.length > `session:${state.id}:`.length)) throw new Error('保存先の参照が正しくありません。フォルダを選び直してください。');
 }
@@ -1088,7 +1067,6 @@ chrome.runtime.onMessage.addListener((message,sender,respond) => {
         if(managed(state)) {await save(state);return state;}
         return pump(state);
       }
-      case 'capture': return claim(state,message.instance,message.mode);
       case 'hello': {
         const oldInstance=state.imageInstance;
         if(managed(state)) {
@@ -1101,16 +1079,8 @@ chrome.runtime.onMessage.addListener((message,sender,respond) => {
         if(oldInstance!==message.instance){
           retireImageOwner(state,oldInstance);state.imageInstance=message.instance;await save(state);
         }
-        // Reload gets a new instance token; the old page no longer owns a live recorder.
-        const lock = (await chrome.storage.session.get('captureLock')).captureLock;
-        if(lock?.tabId === state.workspaceTabId && lock.instance !== message.instance) await chrome.storage.session.remove('captureLock');
         const sessions=await all();
         return {...state,activeDirectoryKeys:sessions.flatMap(s=>[`session:${s.id}`,...(s.saveSettings?.directoryKey ? [s.saveSettings.directoryKey] : []),...(s.pendingDirectoryKey ? [s.pendingDirectoryKey] : []),...(s.batch?.id ? [`batch:${s.batch.id}`] : [])])};
-      }
-      case 'release': {
-        const lock = (await chrome.storage.session.get('captureLock')).captureLock;
-        if(lock?.tabId === state.workspaceTabId && lock.instance === message.instance) await chrome.storage.session.remove('captureLock');
-        return {};
       }
       default: throw new Error('未対応の操作です。');
     }
@@ -1160,8 +1130,6 @@ chrome.tabs.onRemoved.addListener(tabId => {
     for(const [id,flight] of Object.entries(flights)) if(flight.tabId===tabId)delete flights[id];
     await chrome.storage.session.set({[SOURCE_FLIGHTS_KEY]:flights});
     for(const [key,flight] of scanFlights)if(flight.request.tabId===tabId)scanFlights.delete(key);
-    const lock = (await chrome.storage.session.get('captureLock')).captureLock;
-    if(lock?.tabId === tabId) await chrome.storage.session.remove('captureLock');
     for(const state of await all()) {
       if(state.workspaceTabId === tabId) await closeWorkspace(state,true);
       else if (state.tabId === tabId) {
