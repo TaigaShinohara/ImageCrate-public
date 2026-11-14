@@ -584,6 +584,34 @@ try {
       await restartedWorker.evaluate(state=>globalThis.__restoreQA(state),stressState);
       await manager.reload();await manager.waitForFunction(()=>document.querySelector('#count').textContent.includes('全7件'));
     }
+    // Onboarding: automation never auto-opens it (webdriver suppression), so
+    // open it explicitly from the help panel and walk it to completion.
+    const overlay=manager.locator('.onboarding-overlay');
+    assert.equal(await overlay.isHidden(),true,'onboarding does not auto-open under automation');
+    await manager.locator('#help > summary').click();
+    await manager.locator('#onboarding-replay').click();
+    await manager.waitForFunction(()=>!document.querySelector('.onboarding-overlay').hidden);
+    const currentHeadline=()=>manager.evaluate(()=>document.querySelector('.onboarding-page.current .onboarding-headline')?.textContent||'');
+    assert.ok((await currentHeadline()).includes('全部は要らない'),'hook page is first');
+    assert.ok(await manager.locator('.onboarding-dot').count()<=5,'window dots never exceed five');
+    await manager.locator('.onboarding-next').click();
+    await manager.waitForFunction(()=>document.querySelector('.onboarding-page.current')?.dataset.page==='question');
+    assert.equal(await manager.locator('.onboarding-next').isVisible(),false,'question page has no next button');
+    await manager.locator('[data-worry="ads"]').click();
+    await manager.waitForFunction(()=>document.querySelector('.onboarding-page.current')?.dataset.page==='match');
+    assert.ok((await currentHeadline()).includes('ぴったり'),'match page echoes the chosen worry');
+    for(let i=0;i<8;i+=1){await manager.locator('.onboarding-next').click();await manager.waitForTimeout(80);}
+    await manager.waitForFunction(()=>document.querySelector('.onboarding-page.current')?.dataset.page==='practice');
+    await manager.locator('[data-sample="0"]').click();
+    await manager.waitForFunction(()=>document.querySelector('.onboarding-page.current')?.dataset.page==='practice-result');
+    await manager.locator('.onboarding-next').click();await manager.waitForTimeout(80);
+    await manager.locator('.onboarding-next').click();
+    await manager.waitForFunction(()=>document.querySelector('.onboarding-page.current')?.dataset.page==='start');
+    await manager.locator('.onboarding-start-button').click();
+    await manager.waitForFunction(()=>document.querySelector('.onboarding-overlay').hidden);
+    const storedOnboarding=await manager.evaluate(()=>new Promise(resolve=>chrome.storage.local.get('imagecrate.onboarding',items=>resolve(items['imagecrate.onboarding']))));
+    assert.equal(storedOnboarding?.done,true,'onboarding completion is stored on-device');
+    assert.equal(storedOnboarding?.answer,'ads','the chosen worry is stored with the completion');
   }
   assert.deepEqual(errors,[],'no uncaught page errors');
   console.log(`${productName} browser smoke PASS (isolated Chrome, local fixture). Native toolbar activeTab invocation and the macOS folder picker remain manual.`);

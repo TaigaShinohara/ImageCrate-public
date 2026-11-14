@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   ONBOARDING_VERSION, WORRIES, PRAISE,
   buildPages, valueOrder, matchFor, closingLineFor,
-  praiseFor, windowDots, parseStored, shouldShowOnboarding, serializeState,
+  praiseFor, windowDots, parseStored, shouldShowOnboarding, shouldAutoOpen, serializeState,
 } from '../extension/onboarding.js';
 
 const ANSWERS = [null, 'ads', 'compare', 'save', 'unknown'];
@@ -86,8 +86,7 @@ test('window dots show at most five, always include the current page, and move e
   assert.deepEqual(windowDots(0, 0), []);
 });
 
-test('stored state round-trips and stale versions are ignored', () => {
-  const saved = serializeState({ done: true, skipped: false, answer: 'ads' });
+test('stored state round-trips and stale versions are ignored', () => {  const saved = serializeState({ done: true, skipped: false, answer: 'ads' });
   assert.equal(saved.version, ONBOARDING_VERSION);
   assert.deepEqual(parseStored(saved), saved);
   assert.equal(parseStored({ ...saved, version: ONBOARDING_VERSION + 99 }), null);
@@ -96,4 +95,17 @@ test('stored state round-trips and stale versions are ignored', () => {
   assert.equal(shouldShowOnboarding(null), true);
   assert.equal(shouldShowOnboarding(parseStored(saved)), false);
   assert.equal(shouldShowOnboarding(parseStored(serializeState({ done: false }))), true);
+});
+
+test('auto-open is suppressed for automation and ?guide=off, forced by ?guide=1', () => {
+  const fresh = parseStored(serializeState({ done: false }));
+  const done = parseStored(serializeState({ done: true, answer: 'ads' }));
+  assert.equal(shouldAutoOpen({ stored: fresh }), true, 'first-run users see the guide');
+  assert.equal(shouldAutoOpen({ stored: done }), false, 'completed users do not see it again');
+  assert.equal(shouldAutoOpen({ webdriver: true, stored: fresh }), false, 'automation never auto-opens');
+  assert.equal(shouldAutoOpen({ search: '?guide=off', stored: fresh }), false);
+  assert.equal(shouldAutoOpen({ search: '?x=1&guide=off', stored: fresh }), false);
+  assert.equal(shouldAutoOpen({ search: '?guide=1', stored: done }), true, 'manual QA can force it open');
+  assert.equal(shouldAutoOpen({ webdriver: true, search: '?guide=1', stored: fresh }), true, 'force wins over automation suppression');
+  assert.equal(shouldAutoOpen({ search: '?guide=offline', stored: fresh }), true, 'similar words do not suppress');
 });

@@ -115,6 +115,15 @@ export function shouldShowOnboarding(stored) {
   return !stored || stored.done !== true;
 }
 
+// Auto-open gate: automated test environments (navigator.webdriver) are not
+// first-run users and never see the guide; ?guide=off suppresses it and
+// ?guide=1 forces it open for manual QA. Manual replay is unaffected.
+export function shouldAutoOpen({ webdriver = false, search = '', stored = null } = {}) {
+  if (/[?&]guide=1\b/.test(search)) return true;
+  if (webdriver === true || /[?&]guide=off\b/.test(search)) return false;
+  return shouldShowOnboarding(stored);
+}
+
 export function serializeState({ done, skipped = false, answer = null }) {
   return { version: ONBOARDING_VERSION, done: done === true, skipped: skipped === true, answer };
 }
@@ -322,7 +331,9 @@ function initOnboarding() {
   }
 
   document.getElementById('onboarding-replay')?.addEventListener('click', open);
-  storage.get().then((raw) => { if (shouldShowOnboarding(parseStored(raw))) open(); });
+  storage.get().then((raw) => {
+    if (shouldAutoOpen({ webdriver: globalThis.navigator?.webdriver === true, search: globalThis.location?.search || '', stored: parseStored(raw) })) open();
+  });
 }
 
 if (typeof document !== 'undefined') {
