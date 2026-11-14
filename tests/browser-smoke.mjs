@@ -586,6 +586,9 @@ try {
     }
     // Onboarding: automation never auto-opens it (webdriver suppression), so
     // open it explicitly from the help panel and walk it to completion.
+    // Reduced motion keeps the choice buttons stable enough to click and
+    // exercises the reduced-motion path at the same time.
+    await manager.emulateMedia({reducedMotion:'reduce'});
     const overlay=manager.locator('.onboarding-overlay');
     assert.equal(await overlay.isHidden(),true,'onboarding does not auto-open under automation');
     await manager.locator('#help > summary').click();
@@ -612,6 +615,7 @@ try {
     const storedOnboarding=await manager.evaluate(()=>new Promise(resolve=>chrome.storage.local.get('imagecrate.onboarding',items=>resolve(items['imagecrate.onboarding']))));
     assert.equal(storedOnboarding?.done,true,'onboarding completion is stored on-device');
     assert.equal(storedOnboarding?.answer,'ads','the chosen worry is stored with the completion');
+    await manager.emulateMedia({reducedMotion:'no-preference'});
   }
   assert.deepEqual(errors,[],'no uncaught page errors');
   console.log(`${productName} browser smoke PASS (isolated Chrome, local fixture). Native toolbar activeTab invocation and the macOS folder picker remain manual.`);
