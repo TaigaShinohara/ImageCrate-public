@@ -584,6 +584,62 @@ try {
       await restartedWorker.evaluate(state=>globalThis.__restoreQA(state),stressState);
       await manager.reload();await manager.waitForFunction(()=>document.querySelector('#count').textContent.includes('全7件'));
     }
+    // Verify 13-page onboarding flow, window dots, auto-advance choices, geometry, and workspace handoff
+    await manager.locator('#help > summary').click();
+    await manager.locator('#open-onboarding').click();
+    await manager.waitForFunction(()=>document.querySelector('#onboarding')?.open===true);
+    const obLayout = await manager.evaluate(() => {
+      const dlg = document.querySelector('#onboarding');
+      const stage = document.querySelector('#onboarding-stage');
+      const visual = document.querySelector('#onboarding-visual').getBoundingClientRect();
+      const heading = document.querySelector('#onboarding-heading').getBoundingClientRect();
+      const next = document.querySelector('#onboarding-next').getBoundingClientRect();
+      const skip = document.querySelector('#onboarding-skip').getBoundingClientRect();
+      const children = [...stage.children].map(el => el.id);
+      return {
+        noOverflow: dlg.scrollWidth <= dlg.clientWidth,
+        visualAboveHeading: visual.bottom <= heading.top + 1,
+        domOrder: children,
+        nextHeight: next.height,
+        skipHeight: skip.height,
+      };
+    });
+    assert.equal(obLayout.noOverflow, true, 'onboarding has no horizontal overflow');
+    assert.equal(obLayout.visualAboveHeading, true, 'visual hero renders above heading');
+    assert.deepEqual(obLayout.domOrder, ['onboarding-heading', 'onboarding-subtext', 'onboarding-visual', 'onboarding-praise', 'onboarding-controls'], 'DOM order follows heading -> subtext -> visual -> praise -> controls');
+    assert.ok(obLayout.nextHeight >= 44 && obLayout.skipHeight >= 44, 'onboarding buttons meet 44px touch target');
+    assert.equal(await manager.locator('#onboarding-dots .window-dot').count(),5,'window dots display at most 5 dots');
+    assert.equal(await manager.locator('#onboarding-heading').textContent(),'欲しい画像だけ、ひとまとめ');
+    await manager.locator('#onboarding-next').click();
+    assert.equal(await manager.locator('#onboarding-heading').textContent(),'画像集めで、いちばん困ることは？');
+    assert.equal(await manager.locator('#onboarding-next').isVisible(),false,'question page hides Next button');
+    assert.equal(await manager.evaluate(()=>document.querySelector('#onboarding').contains(document.activeElement)),true,'focus stays inside onboarding when Next button hides');
+    const choiceTopBefore = await manager.locator('.onboarding-choice-btn[data-choice-id="effort"]'). evaluate(el => el.getBoundingClientRect().top);
+    await manager.locator('.onboarding-choice-btn[data-choice-id="effort"]').click();
+    const choiceTopAfter = await manager.locator('.onboarding-choice-btn[data-choice-id="effort"]').evaluate(el => el.getBoundingClientRect().top);
+    assert.ok(Math.abs(choiceTopAfter - choiceTopBefore) <= 2, 'showing praise does not shift choice button layout');
+    await manager.waitForFunction(()=>document.querySelector('#onboarding')?.dataset.pageId==='match-pain');
+    assert.match(await manager.locator('#onboarding-heading').textContent(),/1枚ずつ保存するのが手間/);
+    // Check 360px mobile viewport on onboarding
+    await manager.setViewportSize({width:360,height:800});
+    assert.equal(await manager.evaluate(()=>{const d=document.querySelector('#onboarding');return d.scrollWidth<=d.clientWidth;}),true,'onboarding has no horizontal overflow at 360px');
+    await manager.setViewportSize({width:1280,height:900});
+    // Advance through match (2), identity (3), value-1 (4), value-2 (5), step-1 (6), step-2 (7), step-3 (8) to trial (9)
+    for(let step=2;step<=8;step++){
+      await manager.locator('#onboarding-next').click();
+    }
+    assert.equal(await manager.locator('#onboarding').getAttribute('data-page-id'),'interaction-trial');
+    assert.equal(await manager.locator('#onboarding-next').isVisible(),false,'trial page hides Next button');
+    await manager.locator('.onboarding-choice-btn[data-choice-id="illust"]').click();
+    await manager.waitForFunction(()=>document.querySelector('#onboarding')?.dataset.pageId==='match-trial');
+    assert.match(await manager.locator('#onboarding-subtext').textContent(),/記事のイラスト/);
+    await manager.locator('#onboarding-next').click();
+    assert.equal(await manager.locator('#onboarding').getAttribute('data-page-id'),'expectation');
+    await manager.locator('#onboarding-next').click();
+    assert.equal(await manager.locator('#onboarding').getAttribute('data-page-id'),'connection');
+    await manager.locator('#onboarding-next').click();
+    await manager.waitForFunction(()=>document.querySelector('#onboarding')?.open===false);
+    assert.match(await manager.locator('#selection-hint').textContent(),/複数枚をタップして/);
   }
   assert.deepEqual(errors,[],'no uncaught page errors');
   console.log(`${productName} browser smoke PASS (isolated Chrome, local fixture). Native toolbar activeTab invocation and the macOS folder picker remain manual.`);

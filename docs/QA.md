@@ -1,5 +1,15 @@
 # QA — v0.1
 
+## 初回オンボーディング（mobile_onboarding スキル準拠） — 2026-11-16
+
+- 本人指示「オンボーディングスキルを使って実装して」を受け、13ページの初回オンボーディング（`extension/onboarding.js`, `extension/workspace.html`, `extension/workspace.css`, `docs/ONBOARDING.md`）を実装・検証。
+  - `tests/onboarding.test.js`: 全13ページの1ページ1主張・文字数上限・禁止語（「必ず」「絶対に」「誰でも」）不在、質問と結果の別ページ分離、悩み選択に応じた価値ページの並び替え、逃げ道選択時の非断定文言、窓ドット（最大5個・毎ページ移動・端ドット縮小・完了状態）、称賛文の3段階×3通り以上と連続重複防止、状態保存と版番号による再表示判定、`prefers-reduced-motion` 時の触覚抑制を単体検証（PASS）。
+  - `tests/browser-smoke.mjs`: 実Chromeヘッドレス環境で「使い方」からオンボーディングを起動し、窓ドット5個表示、質問ページの「次へ」非表示と選択による自動遷移、マッチ宣言への反映、3ステップ通過、試し操作のカード選択と結果反映、完了後の本体 `#selection-hint` への引き継ぎを確認（PASS）。
+- `npm test`: **357 PASS / 既存対象外1 SKIP**。
+- `npm run check`: **PASS**（manifest, CSP, ローカルモジュール参照, Safari互換性, JS構文検証OK）。
+- `npm run test:browser`: **PASS**（360px/640px/1280px ジオメトリ、reduced-motion、forced-colors、および13ページオンボーディング統合フロー通過）。
+- 未確認: 初見の人間による実機（iOS Safari / デスクトップ Chrome）での操作観察と、オンボーディング直後の3問ヒアリング（「何のためのアプリか」「最初に何をするか」「使ってみたいか」）、実機OSの触覚振動体感、実スクリーンリーダー（VoiceOver）での読み上げ確認。
+
 ## Chromeウェブストア提出準備 — 2026-11-10
 
 - 配布用マニフェストから、インストール時に全サイトへアクセスする `host_permissions` を外した。サイトへのアクセスは、必要な配信元を利用者が許可したときだけ付く `optional_host_permissions` と、ツールバーを押したページだけの一時アクセスに戻した。

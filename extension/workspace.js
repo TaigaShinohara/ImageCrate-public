@@ -8,6 +8,7 @@ import { acquireMediaFetchLease, createPreviewController } from './preview-loade
 import { resolveImageFilename } from './image-format.js';
 import { ZipArchive } from './zip-writer.js';
 import { shareOrDownloadZip } from './web-share.js';
+import { createOnboardingController, getPainOption, shouldAutoShowOnboarding } from './onboarding.js';
 
 const KIND = 'images';
 const $ = id => document.getElementById(id);
@@ -26,6 +27,7 @@ let settings, directoryHandle = null, directoryPermission = 'prompt', managedRun
 let batchDirectoryHandle = null, batchDirectoryPermission = 'prompt';
 let settingsWrites = Promise.resolve();
 let closingSettings = false;
+let onboardingHint = '';
 
 // A converted download owns its Blob URL until Chrome reports a terminal state.
 const convertedURLs = new Map();
@@ -176,7 +178,7 @@ function updateSummary() {
     const hidden=[...selected].filter(url=>!visibleURLs.has(url)).length;
     $('selection').textContent=`選択${selected.size}件${hidden ? ` · 非表示${hidden}件を含む` : ''}`;
     $('footer').dataset.selected=String(selected.size > 0);
-    $('selection-hint').textContent=hidden ? '非表示の画像も保存します' : selected.size ? '選んだ画像をまとめて保存' : '画像をクリックして選択';
+    $('selection-hint').textContent=hidden ? '非表示の画像も保存します' : selected.size ? '選んだ画像をまとめて保存' : onboardingHint || '画像をクリックして選択';
     const failedScope=state.ui?.saveScope==='failed' && state.ui.failedBatchId===state.batch?.id;
     $('recovery-summary').hidden=!failedScope;$('recovery-cancel').hidden=!failedScope;
     $('recovery-summary').textContent=`中断した${batch.interrupted}件を新しい保存先・形式で保存します。通常の選択${selected.size}件は保持します。`;
@@ -788,6 +790,41 @@ $('select-visible').addEventListener('click',()=>{const urls=[...new Set([...sel
 $('clear').addEventListener('click',()=>persistUI({selectedURLs:[]}).then(()=>renderImages()).catch(error));
 $('recovery-cancel').addEventListener('click',()=>persistUI({saveScope:'selection',failedBatchId:null}).catch(error));
 $('save').addEventListener('click',()=>saveURLs(state.ui?.saveScope==='failed'&&state.ui.failedBatchId===state.batch?.id?state.jobs.filter(j=>j.status==='interrupted').map(j=>j.url):[...selected]));
+const onboarding = createOnboardingController({
+  dialog: $('onboarding'),
+  onComplete: ({ skipped, answers }) => {
+    if (!skipped && answers?.painPoint) {
+      const pain = getPainOption(answers.painPoint);
+      if (pain.enforceAdFilter && $('exclude-ad-like') && !$('exclude-ad-like').checked) {
+        $('exclude-ad-like').checked = true;
+        if (state) {
+          renderImages();
+          persistUI(gallery.viewPatch()).catch(error);
+        }
+      }
+      if (pain.workspaceHint) {
+        onboardingHint = pain.workspaceHint;
+        updateSummary();
+      }
+      if (pain.highlightDestination) {
+        const pill = document.querySelector('.destination-pill');
+        pill?.classList.add('ob-destination-pulse');
+      }
+    }
+    const firstCardInput = document.querySelector('.image-select:not(:disabled)');
+    if (firstCardInput) firstCardInput.focus();
+    else $('gallery-heading')?.focus();
+  }
+});
+globalThis.__onboarding = onboarding;
+$('open-onboarding')?.addEventListener('click', () => {
+  const help = $('help');
+  if (help?.open) {
+    help.open = false;
+    help.querySelector('summary')?.setAttribute('aria-expanded', 'false');
+  }
+  onboarding?.open(true);
+});
 let scrollTimer;window.addEventListener('scroll',()=>{if(!state)return;clearTimeout(scrollTimer);scrollTimer=setTimeout(()=>persistUI(gallery.viewPatch()).catch(error),200);},{passive:true});
 try {
   state=await send('hello');selected=new Set(state.selectedURLs || []);$('source-title').textContent=state.title;$('source-title').title=state.title;
@@ -828,6 +865,7 @@ try {
   heightSlider?.syncFromInputs();
   render();
   if(!state.scanned)await scan();else{$('message').textContent='前回の取得結果を表示';applyState(await send('get'));}
+  if(shouldAutoShowOnboarding())onboarding?.open(false);
   requestAnimationFrame(()=>window.scrollTo(0,state.ui?.scrollY || 0));
   setInterval(async()=>{if(pollRunning||loading||requestPending||!state)return;pollRunning=true;try{if(summarizeJobs(state.jobs).active)applyState(await send('get'));}catch(e){error(e);}finally{pollRunning=false;}},1000);
 } catch(e){error(e);$('message').textContent='元ページで拡張アイコンを押し直してください。';$('scan').disabled=true;}
