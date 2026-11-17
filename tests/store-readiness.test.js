@@ -43,7 +43,7 @@ test('recording leftovers and install-time all-sites claims stay out of the exte
 
 test('the store privacy policy matches on-device processing and the published contact', () => {
   const policy = read('../docs/PRIVACY_POLICY.md');
-  assert.match(policy, /deeple\+imagecratestaff@inkboxmail\.com/);
+  assert.match(policy, /support-imagecrate@dobulab\.com/);
   assert.match(policy, /開発者へ送ることはありません/);
   assert.match(policy, /does not send them to the developer/);
   assert.match(policy, /Chrome Web Store User Data Policy/);

@@ -36,7 +36,7 @@
 
 ## 報告と執行
 
-嫌がらせ、悪質な行為、またはその他の容認できない行動の事例は、プロジェクトチーム（[deeple+imagecratestaff@inkboxmail.com](mailto:deeple+imagecratestaff@inkboxmail.com)）に報告できます。すべての苦情は迅速かつ公正に審査・調査されます。
+嫌がらせ、悪質な行為、またはその他の容認できない行動の事例は、プロジェクトチーム（[support-imagecrate@dobulab.com](mailto:support-imagecrate@dobulab.com)）に報告できます。すべての苦情は迅速かつ公正に審査・調査されます。
 
 プロジェクトチームは、事件の報告者のプライバシーとセキュリティを尊重する義務があります。
 
