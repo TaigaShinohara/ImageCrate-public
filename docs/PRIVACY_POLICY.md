@@ -5,7 +5,7 @@ ImageCrate
 
 この文書は、Chromeウェブストアに掲載するImageCrateのプライバシーポリシーです。画像の取得や保存の技術的な境界は [プライバシーとデータ保持](PRIVACY.md) にあります。
 
-連絡先: [deeple+imagecratestaff@inkboxmail.com](mailto:deeple+imagecratestaff@inkboxmail.com)
+連絡先: [support-imagecrate@dobulab.com](mailto:support-imagecrate@dobulab.com)
 
 The use of information received from Google APIs will adhere to the [Chrome Web Store User Data Policy](https://developer.chrome.com/docs/webstore/program-policies/user-data), including the Limited Use requirements.
 

@@ -97,7 +97,7 @@
 
 元形式は、元画像に含まれる撮影者・位置情報などのメタデータも保持します。変換は画像を描き直しますが、完全なメタデータ除去・匿名化の機能ではありません。保存済みファイルやChromeのダウンロード履歴・キャッシュは、拡張のsession後片付けとは別に残ります。データの扱いの詳細は [プライバシーとデータ保持](docs/PRIVACY.md)、ストアに掲載する説明は [プライバシーポリシー](docs/PRIVACY_POLICY.md) を参照してください。
 
-セキュリティ・プライバシーを含む問い合わせ先: [deeple+imagecratestaff@inkboxmail.com](mailto:deeple+imagecratestaff@inkboxmail.com)。報告方法は [SECURITY.md](SECURITY.md) を参照してください。
+セキュリティ・プライバシーを含む問い合わせ先: [support-imagecrate@dobulab.com](mailto:support-imagecrate@dobulab.com)。報告方法は [SECURITY.md](SECURITY.md) を参照してください。
 
 ## 制約
 

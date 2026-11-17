@@ -1,6 +1,6 @@
 # Security
 
-セキュリティやプライバシーに関する連絡先: [deeple+imagecratestaff@inkboxmail.com](mailto:deeple+imagecratestaff@inkboxmail.com)
+セキュリティやプライバシーに関する連絡先: [support-imagecrate@dobulab.com](mailto:support-imagecrate@dobulab.com)
 
 バージョン、Chrome/OS版、合成データでの再現手順、期待結果と実際の結果を記載してください。このアドレスはプロジェクトの報告窓口として意図して掲載しています。
 
