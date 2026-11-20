@@ -2,7 +2,7 @@
 //  ViewController.swift
 //  Shared (App)
 //
-//  Created by 篠原大河 on 2026/11/03.
+//  Created by TaigaShinohara on 2026/11/03.
 //
 
 import WebKit
