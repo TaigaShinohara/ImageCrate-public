@@ -43,7 +43,7 @@
         <p>プレビューは、すでに許可した配信元と、開いたページと同じ配信元の画像を自動で表示します。別の配信元は、一覧上部のボタンを押したときだけ、その配信元へのアクセスをChromeに求めます。許可しなくても選択でき、元の形式ならChromeのダウンロード先へ保存できます。</p>
         <p>保存先・画像をまとめるフォルダ名・保存形式は画面下の「変更」から指定できます。最初は元の形式のまま、Chromeのダウンロード先 / ImageCrate / ページ名に保存します。</p>
         <p>非表示にした選択画像も保存します。</p>
-        <div class="help-actions"><button id="open-onboarding" class="secondary help-onboarding-btn" type="button">はじめてのガイドを開く</button></div>
+        <div class="help-actions"><button id="open-onboarding" data-testid="open-onboarding-button" class="secondary help-onboarding-btn" type="button">はじめてのガイドを開く</button></div>
       </div>
     </details>
   </header>
@@ -52,8 +52,8 @@
     <svg class="icon source-symbol" aria-hidden="true"><use href="#icon-image"/></svg>
     <div class="source-info"><strong id="source-title">読み込み中…</strong><span id="source-domain"></span></div>
     <div class="source-actions">
-      <button id="source" class="quiet" title="元ページを開く"><svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg><span>元ページ</span></button>
-      <button id="scan" class="quiet" title="表示された画像を追加で取得"><svg class="icon" aria-hidden="true"><use href="#icon-refresh"/></svg><span>再スキャン</span></button>
+      <button id="source" data-testid="open-source-page" class="quiet" title="元ページを開く"><svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg><span>元ページ</span></button>
+      <button id="scan" data-testid="rescan-button" class="quiet" title="表示された画像を追加で取得"><svg class="icon" aria-hidden="true"><use href="#icon-refresh"/></svg><span>再スキャン</span></button>
     </div>
   </section>
   <p id="error" class="error" role="alert" hidden></p>
@@ -63,8 +63,8 @@
     <div class="gallery-heading"><h2 id="gallery-heading" tabindex="-1">画像</h2><span id="count" class="count">表示0 / 全0件</span></div>
     <nav class="gallery-views" aria-label="表示する画像"><button id="view-all" class="quiet" aria-pressed="true">すべて</button><button id="view-selected" class="quiet" aria-pressed="false">選択済み 0</button><button id="view-added" class="quiet" aria-pressed="false" hidden>新しく見つかった画像</button></nav>
     <div id="search-tools" class="search-tools">
-      <label class="search-field"><span class="sr-only">画像を検索</span><svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg><input id="query" type="search" placeholder="画像を検索" autocomplete="off"></label>
-      <details id="filters" class="filter-disclosure disclosure">
+      <label class="search-field"><span class="sr-only">画像を検索</span><svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg><input id="query" data-testid="image-search-input" type="search" placeholder="画像を検索" autocomplete="off"></label>
+      <details id="filters" data-testid="filters-panel" class="filter-disclosure disclosure">
         <summary aria-controls="filter-panel" aria-expanded="false"><svg class="icon" aria-hidden="true"><use href="#icon-filter"/></svg><span>絞り込み</span><span id="filter-count" class="filter-count" hidden></span><span class="chevron" aria-hidden="true"></span></summary>
         <div id="filter-panel" class="filter-panel disclosure-panel">
           <div class="ad-filter">
@@ -146,8 +146,8 @@
       <div class="selection-tools">
         <button type="button" id="quick-ad-filter" class="quick-ad-btn" aria-pressed="false" title="広告らしい画像を除外"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg><span>広告除外</span></button>
         <button id="reset-filters" class="quiet" hidden>条件をリセット</button>
-        <button id="select-visible" class="quiet"><svg class="icon" aria-hidden="true"><use href="#icon-select"/></svg><span>表示中を選択</span></button>
-        <button id="clear" class="quiet" disabled><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg><span>すべて解除</span></button>
+        <button id="select-visible" data-testid="select-visible-button" class="quiet"><svg class="icon" aria-hidden="true"><use href="#icon-select"/></svg><span>表示中を選択</span></button>
+        <button id="clear" data-testid="clear-selection-button" class="quiet" disabled><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg><span>すべて解除</span></button>
       </div>
     </div>
     <a id="skip-save" class="skip-link" href="#save-heading">保存操作へ移動</a>
@@ -161,23 +161,23 @@
       </div>
       <div id="preview-access-origins" class="preview-access-origins"></div>
     </section>
-    <div id="grid" class="grid" aria-label="画像一覧" aria-busy="false"></div>
+    <div id="grid" data-testid="image-grid" class="grid" aria-label="画像一覧" aria-busy="false"></div>
     <div id="empty" class="empty" hidden></div>
-    <div class="continuation"><button id="next-page" class="secondary" hidden>続きの候補</button><p id="continuation-hint" class="filter-hint" hidden>選択済みは残します。未選択の候補は次の取得結果へ切り替わります。</p></div>
+    <div class="continuation"><button id="next-page" data-testid="continue-scan-button" class="secondary" hidden>続きの候補</button><p id="continuation-hint" class="filter-hint" hidden>選択済みは残します。未選択の候補は次の取得結果へ切り替わります。</p></div>
   </section>
 </main>
 <footer id="footer" class="footer">
   <div class="footer-inner">
-    <div class="destination-row"><div class="destination-pill"><svg class="icon destination-icon" aria-hidden="true"><use href="#icon-folder"/></svg><span class="destination-label">保存先:</span><p id="destination-summary" class="destination-summary">Chromeのダウンロード先 / ImageCrate / ページ名</p><span class="destination-sep" aria-hidden="true">·</span><p class="format-summary">形式: <strong id="format-summary">元の形式</strong></p><button id="destination-change" class="quiet destination-btn" type="button" aria-label="保存設定を変更" aria-haspopup="dialog" aria-controls="save-settings">変更</button></div></div>
+    <div class="destination-row"><div class="destination-pill"><svg class="icon destination-icon" aria-hidden="true"><use href="#icon-folder"/></svg><span class="destination-label">保存先:</span><p id="destination-summary" class="destination-summary">Chromeのダウンロード先 / ImageCrate / ページ名</p><span class="destination-sep" aria-hidden="true">·</span><p class="format-summary">形式: <strong id="format-summary">元の形式</strong></p><button id="destination-change" data-testid="save-settings-open" class="quiet destination-btn" type="button" aria-label="保存設定を変更" aria-haspopup="dialog" aria-controls="save-settings">変更</button></div></div>
     <p id="directory-warning" class="directory-warning" hidden>選択したフォルダへ保存します。保存中はこのタブを開いたままにしてください。</p>
     <h2 id="save-heading" class="sr-only" tabindex="-1">選択した画像の保存</h2>
     <p id="recovery-summary" class="directory-warning" hidden></p><button id="recovery-cancel" class="quiet" hidden>通常の選択に戻る</button>
     <div class="selection-info"><span id="selection-mark" class="selection-mark" aria-hidden="true"><svg class="icon"><use href="#icon-select"/></svg></span><div><button id="selection" class="selection-summary selection-link" type="button">選択0件</button><p id="selection-hint" class="selection-hint">画像をクリックして選択</p></div></div>
     <div class="save-actions">
       <button id="cancel" class="secondary" hidden><svg class="icon" aria-hidden="true"><use href="#icon-stop"/></svg>保存を停止</button>
-      <button id="retry" class="secondary" hidden><svg class="icon" aria-hidden="true"><use href="#icon-refresh"/></svg>中断分を再試行</button>
+      <button id="retry" data-testid="retry-button" class="secondary" hidden><svg class="icon" aria-hidden="true"><use href="#icon-refresh"/></svg>中断分を再試行</button>
       <button id="prepare-failed" class="secondary" hidden>中断分を新しい保存として準備</button>
-      <button id="save" class="primary" disabled><svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg><span id="save-label">選択0件を保存</span></button>
+      <button id="save" data-testid="save-button" class="primary" disabled><svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg><span id="save-label">選択0件を保存</span></button>
     </div>
     <button id="return-gallery" class="quiet return-gallery" type="button">画像一覧へ戻る</button>
     <div id="batch-panel" class="batch-panel" hidden><progress id="batch-progress" max="1" value="0" aria-label="今回の保存の進捗"></progress><p id="batch" class="batch-status" role="status" aria-live="polite"></p><p id="batch-format" class="batch-format"></p><p id="batch-destination" class="batch-destination"></p></div>
@@ -192,7 +192,7 @@
       <label class="destination-option"><input id="destination-downloads" type="radio" name="destination" value="downloads" checked><span><strong>Chromeのダウンロード先</strong><span class="option-caption">ImageCrateフォルダの中に保存</span></span></label>
       <label class="destination-option"><input id="destination-directory" type="radio" name="destination" value="directory"><span><strong>選択したフォルダ</strong><span id="chosen-directory" class="option-caption">まだ選択していません</span></span></label>
       <label class="destination-option"><input id="destination-zip" type="radio" name="destination" value="zip"><span><strong>ZIPファイルにまとめて保存</strong><span class="option-caption">1つのZIPファイルにまとめて保存・共有</span></span></label>
-      <div class="directory-actions"><button id="choose-directory" class="secondary" type="button">フォルダを選ぶ</button><button id="directory-reconnect" class="secondary" type="button" hidden>このフォルダへの保存を許可</button></div>
+      <div class="directory-actions"><button id="choose-directory" data-testid="choose-directory-button" class="secondary" type="button">フォルダを選ぶ</button><button id="directory-reconnect" class="secondary" type="button" hidden>このフォルダへの保存を許可</button></div>
       <p id="directory-status" class="settings-note directory-status" role="status"></p>
       <p id="directory-details" class="settings-note directory-details" hidden>選択したフォルダへ保存するときは、このタブを開いたままにしてください。保存する画像の配信元へのアクセス許可をChromeに求める場合があります。配信元へのアクセス許可は、Chromeの拡張機能設定で取り消せます。</p>
       <label class="remember-destination"><input id="remember-destination" type="checkbox" checked aria-describedby="remember-destination-help"><span>次の作業でもこの保存先を使う</span></label>
@@ -218,7 +218,7 @@
     <section class="destination-result" aria-labelledby="destination-preview-label"><h3 id="destination-preview-label">保存先のプレビュー</h3><p id="destination-preview" class="destination-preview" aria-live="polite">Chromeのダウンロード先 / ImageCrate / ページ名</p></section>
     <p class="settings-note">同じ名前のフォルダがある場合は、その中へ保存します。ファイル名が重なっても上書きせず、別名で保存します。</p>
     <p id="settings-error" class="error settings-error" role="alert" hidden></p>
-    <div class="settings-actions"><button id="settings-cancel" class="secondary" type="button">キャンセル</button><button id="settings-done" class="primary" type="button">設定を適用</button></div>
+    <div class="settings-actions"><button id="settings-cancel" class="secondary" type="button">キャンセル</button><button id="settings-done" data-testid="save-settings-apply" class="primary" type="button">設定を適用</button></div>
   </div>
 </dialog>
 <dialog id="image-preview" class="image-preview" aria-labelledby="preview-title">

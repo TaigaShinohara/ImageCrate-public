@@ -40,3 +40,6 @@ safari/ImageCrate/**/*.mode2v3
 safari/ImageCrate/**/*.moved-aside
 safari/ImageCrate/**/*.pbxuser
 safari/ImageCrate/**/*.perspectivev3
+
+# Agent CLI state (local only)
+.agent/
